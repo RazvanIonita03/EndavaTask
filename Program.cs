@@ -1,8 +1,12 @@
+using CarInsurance.Api.Configuration;
 using CarInsurance.Api.Data;
 using CarInsurance.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<PolicyExpirationOptions>(
+    builder.Configuration.GetSection(PolicyExpirationOptions.SectionName));
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
@@ -10,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 
 builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<IPolicyExpirationService, PolicyExpirationService>();
+
+builder.Services.AddHostedService<PolicyExpirationBackgroundService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

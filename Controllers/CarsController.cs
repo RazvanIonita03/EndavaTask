@@ -6,9 +6,10 @@ namespace CarInsurance.Api.Controllers;
 
 [ApiController]
 [Route("api")]
-public class CarsController(CarService service) : ControllerBase
+public class CarsController(CarService service, IPolicyExpirationService expirationService) : ControllerBase
 {
     private readonly CarService _service = service;
+    private readonly IPolicyExpirationService _expirationService = expirationService;
 
     [HttpGet("cars")]
     public async Task<ActionResult<List<CarDto>>> GetCars()
@@ -68,6 +69,21 @@ public class CarsController(CarService service) : ControllerBase
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+
+    // Development/Testing endpoint to manually trigger expiration check
+    [HttpPost("admin/check-expirations")]
+    public async Task<ActionResult> CheckExpirations()
+    {
+        try
+        {
+            await _expirationService.CheckAndLogExpiredPoliciesAsync();
+            return Ok(new { message = "Expiration check completed. Check logs for details." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 }
