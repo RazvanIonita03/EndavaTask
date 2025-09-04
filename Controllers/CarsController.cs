@@ -25,9 +25,13 @@ public class CarsController(CarService service) : ControllerBase
             var valid = await _service.IsInsuranceValidAsync(carId, parsed);
             return Ok(new InsuranceValidityResponse(carId, parsed.ToString("yyyy-MM-dd"), valid));
         }
-        catch (KeyNotFoundException)
+        catch (KeyNotFoundException ex)
         {
-            return NotFound();
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 
@@ -39,9 +43,13 @@ public class CarsController(CarService service) : ControllerBase
             var claim = await _service.RegisterClaimAsync(carId, request);
             return CreatedAtAction(nameof(RegisterClaim), new { carId = claim.CarId, claimId = claim.Id }, claim);
         }
-        catch (KeyNotFoundException)
+        catch (KeyNotFoundException ex)
         {
-            return NotFound();
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 
@@ -53,9 +61,13 @@ public class CarsController(CarService service) : ControllerBase
             var history = await _service.GetCarHistoryAsync(carId);
             return Ok(history);
         }
-        catch (KeyNotFoundException)
+        catch (KeyNotFoundException ex)
         {
-            return NotFound();
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

@@ -19,8 +19,18 @@ public class CarService(AppDbContext db)
 
     public async Task<bool> IsInsuranceValidAsync(long carId, DateOnly date)
     {
+        if (carId <= 0)
+            throw new ArgumentException("Car ID must be a positive number.", nameof(carId));
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var minDate = new DateOnly(1900, 1, 1);
+        var maxDate = today.AddYears(50);
+
+        if (date < minDate || date > maxDate)
+            throw new ArgumentException($"Date must be between {minDate:yyyy-MM-dd} and {maxDate:yyyy-MM-dd}.", nameof(date));
+
         var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        if (!carExists) throw new KeyNotFoundException($"Car with ID {carId} not found.");
 
         return await _db.Policies.AnyAsync(p =>
             p.CarId == carId &&
@@ -31,8 +41,21 @@ public class CarService(AppDbContext db)
 
     public async Task<ClaimResponse> RegisterClaimAsync(long carId, CreateClaimRequest request)
     {
+        if (carId <= 0)
+            throw new ArgumentException("Car ID must be a positive number.", nameof(carId));
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+            throw new ArgumentException("Claim description is required.", nameof(request.Description));
+
+        if (request.Amount <= 0)
+            throw new ArgumentException("Claim amount must be greater than zero.", nameof(request.Amount));
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (request.ClaimDate > today)
+            throw new ArgumentException("Claim date cannot be in the future.", nameof(request.ClaimDate));
+
         var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        if (!carExists) throw new KeyNotFoundException($"Car with ID {carId} not found.");
 
         var claim = new Claim
         {
@@ -50,8 +73,11 @@ public class CarService(AppDbContext db)
 
     public async Task<CarHistoryResponse> GetCarHistoryAsync(long carId)
     {
+        if (carId <= 0)
+            throw new ArgumentException("Car ID must be a positive number.", nameof(carId));
+
         var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        if (!carExists) throw new KeyNotFoundException($"Car with ID {carId} not found.");
 
         var policies = await _db.Policies
             .Where(p => p.CarId == carId)
