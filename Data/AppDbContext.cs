@@ -57,5 +57,12 @@ public static class SeedData
             new InsurancePolicy { CarId = car2.Id, Provider = "Allianz", StartDate = new DateOnly(2025,3,1), EndDate = new DateOnly(2025,9,30) }
         );
         db.SaveChanges();
+
+        db.Claims.AddRange(
+            new Claim { CarId = car1.Id, ClaimDate = new DateOnly(2024,6,15), Description = "Minor fender bender", Amount = 1250.50m },
+            new Claim { CarId = car1.Id, ClaimDate = new DateOnly(2024,9,3), Description = "Windshield replacement", Amount = 350.00m },
+            new Claim { CarId = car2.Id, ClaimDate = new DateOnly(2025,5,20), Description = "Hail damage repair", Amount = 2100.75m }
+        );
+        db.SaveChanges();
     }
 }
