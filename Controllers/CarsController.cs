@@ -36,6 +36,50 @@ public class CarsController(CarService service, IPolicyExpirationService expirat
         }
     }
 
+    [HttpPost("cars")]
+    public async Task<ActionResult<CarDto>> CreateCar([FromBody] CreateCarRequest request)
+    {
+        try
+        {
+            var car = await _service.CreateCarAsync(request);
+            return CreatedAtAction(nameof(GetCars), new { id = car.Id }, car);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
+    [HttpPost("cars/{carId:long}/policies")]
+    public async Task<ActionResult<InsurancePolicyDto>> CreateInsurancePolicy(long carId, [FromBody] CreateInsurancePolicyRequest request)
+    {
+        try
+        {
+            var policy = await _service.CreateInsurancePolicyAsync(carId, request);
+            return CreatedAtAction(nameof(CreateInsurancePolicy), new { carId = policy.CarId, policyId = policy.Id }, policy);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
     [HttpPost("cars/{carId:long}/claims")]
     public async Task<ActionResult<ClaimResponse>> RegisterClaim(long carId, [FromBody] CreateClaimRequest request)
     {

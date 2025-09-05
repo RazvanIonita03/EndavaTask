@@ -5,3 +5,107 @@ Accept: application/json
 ### Check insurance validity for a car (example: carId=1, date=2024-06-01)
 GET https://localhost:61341/api/cars/1/insurance-valid?date=2024-06-01
 Accept: application/json
+
+### Test boundary cases for insurance validity check
+
+### Invalid car ID (should return 404)
+GET https://localhost:61341/api/cars/999/insurance-valid?date=2024-06-01
+Accept: application/json
+
+### Negative car ID (should return 400)
+GET https://localhost:61341/api/cars/-1/insurance-valid?date=2024-06-01
+Accept: application/json
+
+### Zero car ID (should return 400)
+GET https://localhost:61341/api/cars/0/insurance-valid?date=2024-06-01
+Accept: application/json
+
+### Invalid date format (should return 400)
+GET https://localhost:61341/api/cars/1/insurance-valid?date=invalid-date
+Accept: application/json
+
+### Date too old (should return 400)
+GET https://localhost:61341/api/cars/1/insurance-valid?date=1800-01-01
+Accept: application/json
+
+### Date too far in future (should return 400)
+GET https://localhost:61341/api/cars/1/insurance-valid?date=2080-01-01
+Accept: application/json
+
+### Create a new car
+POST https://localhost:61341/api/cars
+Content-Type: application/json
+
+{
+    "vin": "VIN11111111111111",
+    "make": "Ford",
+    "model": "Focus", 
+    "yearOfManufacture": 2022,
+    "ownerId": 1
+}
+
+### Create car with duplicate VIN (should return 409)
+POST https://localhost:61341/api/cars
+Content-Type: application/json
+
+{
+    "vin": "VIN12345678901234",
+    "make": "Ford",
+    "model": "Focus", 
+    "yearOfManufacture": 2022,
+    "ownerId": 1
+}
+
+### Create car with invalid VIN length (should return 400)
+POST https://localhost:61341/api/cars
+Content-Type: application/json
+
+{
+    "vin": "SHORT",
+    "make": "Ford",
+    "model": "Focus", 
+    "yearOfManufacture": 2022,
+    "ownerId": 1
+}
+
+### Create insurance policy
+POST https://localhost:61341/api/cars/1/policies
+Content-Type: application/json
+
+{
+    "provider": "NewInsuranceProvider",
+    "startDate": "2025-06-01",
+    "endDate": "2026-05-31"
+}
+
+### Create overlapping insurance policy (should return 409)
+POST https://localhost:61341/api/cars/1/policies
+Content-Type: application/json
+
+{
+    "provider": "OverlapProvider",
+    "startDate": "2024-06-01",
+    "endDate": "2024-12-31"
+}
+
+### Register a claim
+POST https://localhost:61341/api/cars/1/claims
+Content-Type: application/json
+
+{
+    "claimDate": "2024-06-15",
+    "description": "Minor accident repair",
+    "amount": 750.50
+}
+
+### Get car history
+GET https://localhost:61341/api/cars/1/history
+Accept: application/json
+
+### Get car history for non-existent car (should return 404)
+GET https://localhost:61341/api/cars/999/history
+Accept: application/json
+
+### Manually trigger policy expiration check (admin endpoint)
+POST https://localhost:61341/api/admin/check-expirations
+Accept: application/json

@@ -10,6 +10,11 @@ public record ClaimResponse(long Id, long CarId, DateOnly ClaimDate, string Desc
 
 public record CarHistoryResponse(long CarId, List<CarHistoryEvent> Events);
 
+// Additional DTOs for creating cars and insurance policies
+public record CreateCarRequest(string Vin, string? Make, string? Model, int YearOfManufacture, long OwnerId);
+public record CreateInsurancePolicyRequest(string Provider, DateOnly StartDate, DateOnly EndDate);
+public record InsurancePolicyDto(long Id, long CarId, string? Provider, DateOnly StartDate, DateOnly EndDate);
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "eventType")]
 [JsonDerivedType(typeof(PolicyStartEvent), "PolicyStart")]
 [JsonDerivedType(typeof(PolicyEndEvent), "PolicyEnd")]

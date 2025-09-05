@@ -8,10 +8,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<PolicyExpirationOptions>(
     builder.Configuration.GetSection(PolicyExpirationOptions.SectionName));
 
-builder.Services.AddDbContext<AppDbContext>(opt =>
+// Use InMemory for integration tests; Sqlite otherwise
+if (builder.Environment.IsEnvironment("Testing"))
 {
-    opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
-});
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+    {
+        opt.UseInMemoryDatabase("TestDb");
+    });
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+    {
+        opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
+    });
+}
 
 builder.Services.AddScoped<CarService>();
 builder.Services.AddScoped<IPolicyExpirationService, PolicyExpirationService>();
@@ -42,3 +53,6 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
+// Expose Program class for WebApplicationFactory in integration tests
+public partial class Program { }
